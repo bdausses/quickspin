@@ -1,0 +1,38 @@
+# Define Common Tags - these tags get applied to every EC2 instance that gets spun up via this terraform plan.
+tag_application = "app_name"
+tag_contact = "joe_user"
+tag_customer = "acme_corp"
+tag_dept = "sales"
+tag_production = "No"
+tag_project = "acme_transformation"
+tag_sleep = "true"
+tag_ttl = "2"
+
+# Define DNS zones
+chef_server_zone_id = "Zxxxxxxxxxxxxx"
+a2_server_zone_id = "Zxxxxxxxxxxxxx"
+
+# Define Chef User
+email = "joe_user@chef.io"
+first_name = "Joe"
+last_name = "User"
+username = "joe"
+
+# Define Key Name - This is the name of your key at AWS.
+key_name = "joe_users_key"
+
+# Instance Key - The local copy of your key file.
+instance_key = "~/.ssh/id_rsa"
+
+# Define Sample Node Counts
+centos_sample_node_count = 1
+ubuntu_sample_node_count = 1
+rhel_sample_node_count = 1
+sles_sample_node_count = 1
+
+# Define A2 License
+# Only place a valid A2 license in this space.  If you don't have one or don't want to use it, leave this blank.
+a2_license = ""
+
+# Set harvesting and updating for .pem and knife configuration
+# harvest_and_update_knife = true

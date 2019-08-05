@@ -1,0 +1,6 @@
+# See https://docs.getchef.com/config_rb_knife.html for more information on knife configuration options
+
+# These three options will get overwritten if you set harvest_and_update_knife = true
+chef_server_url "https://your.chef-server.com/organizations/org"
+client_key "~/.chef/keys/[tag_contact]-your.chef-server.com-username.pem"
+node_name "username"
