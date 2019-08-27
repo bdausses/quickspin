@@ -366,16 +366,18 @@ resource "null_resource" "harvest_reporting_token" {
 
 # Bldr server DNS entry
 resource "aws_route53_record" "bldr_server" {
+  count = var.provision_bldr ? 1 : 0
   zone_id = "${var.chef_server_zone_id}"
   name    = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-bldr"
   type    = "A"
   ttl     = "60"
-  records = ["${aws_eip.bldr_server_eip.public_ip}"]
+  records = ["${aws_eip.bldr_server_eip[count.index].public_ip}"]
 }
 
 # Bldr server Elastic IP
 resource "aws_eip" "bldr_server_eip" {
-  instance = "${aws_instance.bldr_server.id}"
+  count = var.provision_bldr ? 1 : 0
+  instance = "${aws_instance.bldr_server[count.index].id}"
   depends_on = ["aws_instance.bldr_server"]
   vpc      = true
 }
@@ -399,6 +401,7 @@ data "template_file" "populate_bldr" {
 
 # Spin up the Bldr server
 resource "aws_instance" "bldr_server" {
+  count = var.provision_bldr ? 1 : 0
   ami           = "${data.aws_ami.centos.id}"
   instance_type = "${var.bldr_server_instance_type}"
   key_name      = "${var.key_name}"
@@ -417,13 +420,14 @@ resource "aws_instance" "bldr_server" {
 
 # Post-provisioning steps for Bldr server
 resource "null_resource" "bldr_preparation" {
+  count = var.provision_bldr ? 1 : 0
   depends_on = ["aws_route53_record.bldr_server", "aws_route53_record.a2_server"]
     triggers = {
-        instance = "${aws_instance.bldr_server.id}"
+        instance = "${aws_instance.bldr_server[count.index].id}"
     }
 
     connection {
-      host        ="${aws_eip.bldr_server_eip.public_ip}"
+      host        ="${aws_eip.bldr_server_eip[count.index].public_ip}"
       user           = "centos"
       private_key    = "${file("${var.instance_key}")}"
       }
@@ -455,15 +459,16 @@ resource "null_resource" "bldr_preparation" {
 }
 
 resource "null_resource" "bldr_preparation_2" {
+  count = var.provision_bldr ? 1 : 0
   depends_on = ["aws_route53_record.bldr_server",
                 "null_resource.a2_preparation",
                 "null_resource.bldr_preparation"]
     triggers = {
-        instance = "${aws_instance.bldr_server.id}"
+        instance = "${aws_instance.bldr_server[count.index].id}"
     }
 
     connection {
-      host        ="${aws_eip.bldr_server_eip.public_ip}"
+      host        ="${aws_eip.bldr_server_eip[count.index].public_ip}"
       user           = "centos"
       private_key    = "${file("${var.instance_key}")}"
       }

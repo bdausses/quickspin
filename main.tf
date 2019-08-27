@@ -1,3 +1,7 @@
+terraform {
+  required_version = "~> 0.12.6"
+}
+
 provider "aws" {
   region     = "${var.region}"
 }
@@ -16,6 +20,7 @@ module "base_mod" {
   harvest_and_update_knife  = "${var.harvest_and_update_knife}"
   chef_server_zone_id       = "${var.chef_server_zone_id}"
   a2_server_zone_id         = "${var.a2_server_zone_id}"
+  provision_bldr            = "${var.provision_bldr}"
 }
 
 module "centos_sample_nodes" {

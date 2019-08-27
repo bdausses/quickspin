@@ -45,3 +45,6 @@ variable "chef_server_zone_id" {}
 # A2 Server DNS info
 # You can get this information by looking in Route53 -> Hosted Zones -> Hosted Zone ID (on right hand side of GUI)
 variable "a2_server_zone_id" {}
+
+# Bldr Server
+variable "provision_bldr" {}

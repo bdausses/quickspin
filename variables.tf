@@ -113,3 +113,8 @@ variable "chef_server_zone_id" {}
 
 # A2 Server DNS info
 variable "a2_server_zone_id" {}
+
+# Bldr Server
+variable "provision_bldr" {
+  default = false
+}
