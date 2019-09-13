@@ -75,6 +75,10 @@ resource "aws_instance" "chef_server" {
   instance_type = "${var.chef_server_instance_type}"
   key_name      = "${var.key_name}"
   security_groups = ["${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-allow-all"]
+  root_block_device {
+    volume_size = "25"
+    delete_on_termination = true
+  }
   tags = "${merge(
   var.common_tags,
   map(
@@ -255,6 +259,10 @@ resource "aws_instance" "a2_server" {
     instance_type = "${var.a2_server_instance_type}"
     key_name      = "${var.key_name}"
     security_groups = ["${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-allow-all"]
+    root_block_device {
+      volume_size = "25"
+      delete_on_termination = true
+    }
     tags = "${merge(
       var.common_tags,
       map(
@@ -408,6 +416,7 @@ resource "aws_instance" "bldr_server" {
   security_groups = ["${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-allow-all"]
   root_block_device {
     volume_size = "50"
+    delete_on_termination = true
   }
   tags = "${merge(
   var.common_tags,
