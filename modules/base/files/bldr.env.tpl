@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# The endpoint and port for your Postgresql instance
+# Change only if needed
+export POSTGRES_HOST=localhost
+export POSTGRES_PORT=5432
+
 # The endpoint, key and secret for your Minio instance (see README)
 # Change these before the first install if needed
 export MINIO_ENDPOINT=http://localhost:9000
@@ -52,6 +57,10 @@ export OAUTH_USERINFO_URL=https://${a2_fqdn}/session/userinfo
 # export OAUTH_AUTHORIZE_URL=https://<your.okta.domain>.com/oauth2/v1/authorize
 export OAUTH_AUTHORIZE_URL=https://${a2_fqdn}/session/new
 
+# The OAUTH_SIGNUP_URL is the link used to register users with the OAUTH provider
+export OAUTH_SIGNUP_URL=https://www.yahoo.com
+# export OAUTH_SIGNUP_URL=https://bitbucket.org/account/signup/
+# export OAUTH_SIGNUP_URL=https://gitlab.com/users/sign_in#register-pane
 # The OAUTH_TOKEN_URL is the *fully qualified* OAuth2 token endpoint
 export OAUTH_TOKEN_URL=https://github.com/login/oauth/access_token
 # export OAUTH_TOKEN_URL=https://bitbucket.org/site/oauth2/access_token
@@ -73,6 +82,7 @@ export OAUTH_CLIENT_SECRET=0123456789abcdef0123456789abcdef01234567
 # Modify these only if there is a specific need, otherwise leave as is
 export BLDR_CHANNEL=on-prem-stable
 export BLDR_ORIGIN=habitat
+export HAB_BLDR_URL=https://bldr.habitat.sh
 
 # Help us make Habitat better! Opt into analytics by changing the ANALYTICS_ENABLED
 # setting below to true, then optionally provide your company name. (Analytics is

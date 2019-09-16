@@ -80,11 +80,18 @@ resource "aws_instance" "chef_server" {
     delete_on_termination = true
   }
   tags = "${merge(
-  var.common_tags,
-  map(
-    "Name", "${lookup(var.common_tags, "X-Contact")}_${lookup(var.common_tags, "X-Project")}_chef_server",
-    "X-Role", "Chef Server"
-    )
+    var.common_tags,
+    map(
+      "Name", "${lookup(var.common_tags, "X-Contact")}_${lookup(var.common_tags, "X-Project")}_chef_server",
+      "X-Role", "Chef Server"
+      )
+  )}"
+  volume_tags = "${merge(
+    var.common_tags,
+    map(
+      "Name", "${lookup(var.common_tags, "X-Contact")}_${lookup(var.common_tags, "X-Project")}_chef_server",
+      "X-Role", "Chef Server"
+      )
   )}"
 }
 
@@ -270,6 +277,13 @@ resource "aws_instance" "a2_server" {
         "X-Role", "Chef Server"
       )
     )}"
+    volume_tags = "${merge(
+      var.common_tags,
+      map(
+        "Name", "${lookup(var.common_tags, "X-Contact")}_${lookup(var.common_tags, "X-Project")}_a2_server",
+        "X-Role", "Chef Server"
+      )
+    )}"
   }
 
 # Post-provisioning steps for A2 server
@@ -419,11 +433,18 @@ resource "aws_instance" "bldr_server" {
     delete_on_termination = true
   }
   tags = "${merge(
-  var.common_tags,
-  map(
-    "Name", "${lookup(var.common_tags, "X-Contact")}_${lookup(var.common_tags, "X-Project")}_bldr_server",
-    "X-Role", "On-Prem Bldr Server"
-    )
+    var.common_tags,
+    map(
+      "Name", "${lookup(var.common_tags, "X-Contact")}_${lookup(var.common_tags, "X-Project")}_bldr_server",
+      "X-Role", "On-Prem Bldr Server"
+      )
+  )}"
+  volume_tags = "${merge(
+    var.common_tags,
+    map(
+      "Name", "${lookup(var.common_tags, "X-Contact")}_${lookup(var.common_tags, "X-Project")}_bldr_server",
+      "X-Role", "On-Prem Bldr Server"
+      )
   )}"
 }
 
