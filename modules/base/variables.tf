@@ -38,13 +38,8 @@ variable "a2_server_instance_type" {}
 # knife-override.rb file gets updated.
 variable "harvest_and_update_knife" {}
 
-# Chef Server DNS info
-# You can get this information by looking in Route53 -> Hosted Zones -> Hosted Zone ID (on right hand side of GUI)
-variable "chef_server_zone_id" {}
-
-# A2 Server DNS info
-# You can get this information by looking in Route53 -> Hosted Zones -> Hosted Zone ID (on right hand side of GUI)
-variable "a2_server_zone_id" {}
+# Domain Zone ID
+variable "domain_zone_id" {}
 
 # Bldr Server
 variable "provision_bldr" {}

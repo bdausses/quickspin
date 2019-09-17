@@ -45,8 +45,8 @@ resource "aws_security_group" "allow-all" {
 
 # Chef server DNS entry
 resource "aws_route53_record" "chef_server" {
-  zone_id = "${var.chef_server_zone_id}"
-  name    = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}"
+  zone_id = "${var.domain_zone_id}"
+  name    = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-chef"
   type    = "A"
   ttl     = "60"
   records = ["${aws_eip.chef_server_eip.public_ip}"]
@@ -63,9 +63,8 @@ resource "aws_eip" "chef_server_eip" {
 data "template_file" "dna_json" {
   template = "${file("${path.module}/files/dna.json.tpl")}"
   vars = {
-    host      = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}"
-    domain    = "chef-demo.com"
-    a2_domain = "automate-demo.com"
+    chef_server = "${aws_route53_record.chef_server.fqdn}"
+    a2_server   = "${aws_route53_record.a2_server.fqdn}"
   }
 }
 
@@ -230,8 +229,8 @@ resource "null_resource" "harvest_key_and_update_knife_override" {
 
 # A2 server DNS entry
 resource "aws_route53_record" "a2_server" {
-  zone_id = "${var.a2_server_zone_id}"
-  name    = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}"
+  zone_id = "${var.domain_zone_id}"
+  name    = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-automate"
   type    = "A"
   ttl     = "60"
   records = ["${aws_eip.a2_server_eip.public_ip}"]
@@ -389,8 +388,8 @@ resource "null_resource" "harvest_reporting_token" {
 # Bldr server DNS entry
 resource "aws_route53_record" "bldr_server" {
   count = var.provision_bldr ? 1 : 0
-  zone_id = "${var.chef_server_zone_id}"
-  name    = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-bldr"
+  zone_id = "${var.domain_zone_id}"
+  name    = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-chef"
   type    = "A"
   ttl     = "60"
   records = ["${aws_eip.bldr_server_eip[count.index].public_ip}"]

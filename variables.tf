@@ -108,11 +108,10 @@ variable "ubuntu_sample_node_count" {
   default = 0
 }
 
-# Chef Server DNS info
-variable "chef_server_zone_id" {}
-
-# A2 Server DNS info
-variable "a2_server_zone_id" {}
+# DNS Domain Name
+variable "domain" {
+  default = "chef-demo.com"
+}
 
 # Bldr Server
 variable "provision_bldr" {

@@ -11,4 +11,4 @@ variable "key_name" {}
 variable "instance_key" {}
 
 # Chef Server Zone ID - This is the DNS zone that will be used.
-variable "chef_server_zone_id" {}
+variable "domain_zone_id" {}

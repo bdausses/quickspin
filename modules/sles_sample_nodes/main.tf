@@ -33,7 +33,7 @@ resource "aws_instance" "sles_sample_node" {
 
 # SLES sample nodes DNS entry
 resource "aws_route53_record" "sles_sample_node" {
-  zone_id = "${var.chef_server_zone_id}"
+  zone_id = "${var.domain_zone_id}"
   count   = "${var.node_count}"
   name    = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-sles-sample-${count.index + 1}"
   type    = "A"

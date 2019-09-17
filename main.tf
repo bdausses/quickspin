@@ -6,6 +6,11 @@ provider "aws" {
   region     = "${var.region}"
 }
 
+data "aws_route53_zone" "selected" {
+  name         = "${var.domain}"
+  #private_zone = true
+}
+
 module "base_mod" {
   source                    = "./modules/base"
   common_tags               = "${local.common_tags}"
@@ -18,8 +23,7 @@ module "base_mod" {
   a2_server_instance_type   = "${var.a2_server_instance_type}"
   chef_user                 = "${local.chef_user}"
   harvest_and_update_knife  = "${var.harvest_and_update_knife}"
-  chef_server_zone_id       = "${var.chef_server_zone_id}"
-  a2_server_zone_id         = "${var.a2_server_zone_id}"
+  domain_zone_id            = "${data.aws_route53_zone.selected.zone_id}"
   provision_bldr            = "${var.provision_bldr}"
 }
 
@@ -29,7 +33,7 @@ module "centos_sample_nodes" {
   key_name              = "${var.key_name}"
   instance_key          = "${var.instance_key}"
   node_count            = "${var.centos_sample_node_count}"
-  chef_server_zone_id   = "${var.chef_server_zone_id}"
+  domain_zone_id        = "${data.aws_route53_zone.selected.zone_id}"
 }
 
 module "rhel_sample_nodes" {
@@ -38,7 +42,7 @@ module "rhel_sample_nodes" {
   key_name              = "${var.key_name}"
   instance_key          = "${var.instance_key}"
   node_count            = "${var.rhel_sample_node_count}"
-  chef_server_zone_id   = "${var.chef_server_zone_id}"
+  domain_zone_id        = "${data.aws_route53_zone.selected.zone_id}"
 }
 
 module "sles_sample_nodes" {
@@ -47,7 +51,7 @@ module "sles_sample_nodes" {
   key_name              = "${var.key_name}"
   instance_key          = "${var.instance_key}"
   node_count            = "${var.sles_sample_node_count}"
-  chef_server_zone_id   = "${var.chef_server_zone_id}"
+  domain_zone_id        = "${data.aws_route53_zone.selected.zone_id}"
 }
 
 module "ubuntu_sample_nodes" {
@@ -56,5 +60,5 @@ module "ubuntu_sample_nodes" {
   key_name              = "${var.key_name}"
   instance_key          = "${var.instance_key}"
   node_count            = "${var.ubuntu_sample_node_count}"
-  chef_server_zone_id   = "${var.chef_server_zone_id}"
+  domain_zone_id        = "${data.aws_route53_zone.selected.zone_id}"
 }
