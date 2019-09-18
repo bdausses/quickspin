@@ -389,7 +389,7 @@ resource "null_resource" "harvest_reporting_token" {
 resource "aws_route53_record" "bldr_server" {
   count = var.provision_bldr ? 1 : 0
   zone_id = "${var.domain_zone_id}"
-  name    = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-chef"
+  name    = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-bldr"
   type    = "A"
   ttl     = "60"
   records = ["${aws_eip.bldr_server_eip[count.index].public_ip}"]
@@ -408,7 +408,7 @@ data "template_file" "bldr_env" {
   template = "${file("${path.module}/files/bldr.env.tpl")}"
   vars = {
     bldr_fqdn = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-bldr.chef-demo.com"
-    a2_fqdn   = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}.automate-demo.com"
+    a2_fqdn   = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-automate.chef-demo.com"
   }
 }
 
@@ -505,7 +505,7 @@ resource "null_resource" "bldr_preparation_2" {
   # Harvest A2 SSL cert and restart Bldr
   provisioner "remote-exec" {
     inline = [
-      "openssl s_client -showcerts -connect ${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}.automate-demo.com:443 </dev/null 2>/dev/null|openssl x509 -outform PEM | sudo tee -a $(hab pkg path core/cacerts)/ssl/cert.pem",
+      "openssl s_client -showcerts -connect ${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-automate.chef-demo.com:443 </dev/null 2>/dev/null|openssl x509 -outform PEM | sudo tee -a $(hab pkg path core/cacerts)/ssl/cert.pem",
       "sudo systemctl restart hab-sup",
     ]
   }
