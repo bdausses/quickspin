@@ -9,8 +9,8 @@ output "a2_server_url" {
   value            = module.base_mod.a2_server_url
 }
 
-output "bldr_server_url" {
-  value            = module.base_mod.bldr_server_url
+output "bldr_server_fqdn" {
+  value            = module.base_mod.bldr_server_fqdn
 }
 #
 # # Automate Server

@@ -68,6 +68,17 @@ data "template_file" "dna_json" {
   }
 }
 
+# Set up client.rb
+data "template_file" "local_root_client" {
+  template = "${file("${path.module}/files/local_root_client.rb.tpl")}"
+  vars = {
+    chef_server = "${aws_route53_record.chef_server.fqdn}"
+    chef_user = "${var.chef_user["username"]}"
+    org_short_name = "${var.chef_org["short_name"]}"
+
+  }
+}
+
 # Spin up the Chef server
 resource "aws_instance" "chef_server" {
   ami           = "${data.aws_ami.centos.id}"
@@ -113,6 +124,12 @@ resource "null_resource" "chef_preparation" {
       destination    = "/tmp/dna.json"
     }
 
+    # Write client.rb for local operations
+    provisioner "file" {
+      content        = "${data.template_file.local_root_client.rendered}"
+      destination    = "/tmp/local_root_client.rb"
+    }
+
   # Install Chef Server
   provisioner "remote-exec" {
     inline = [
@@ -124,6 +141,9 @@ resource "null_resource" "chef_preparation" {
       "curl -L https://www.chef.io/chef/install.sh | sudo bash",
       "sudo mkdir -p /var/chef/cache /var/chef/cookbooks",
       "sudo mkdir /opt/chef-keys && sudo chmod 700 /opt/chef-keys/",
+      "sudo mkdir /opt/chef-client-config && sudo chmod 700 /opt/chef-client-config/",
+      "sudo mv /tmp/local_root_client.rb /opt/chef-client-config/",
+      "sudo chmod 600 /opt/chef-client-config/local_root_client.rb",
       "wget -qO- https://supermarket.chef.io/cookbooks/chef-server/download | sudo tar xvzC /var/chef/cookbooks",
       "for dep in chef-ingredient; do wget -qO- https://supermarket.chef.io/cookbooks/$${dep}/download | sudo tar xvzC /var/chef/cookbooks; done",
       "sudo mkdir -p /etc/chef/accepted_licenses",
@@ -141,6 +161,7 @@ resource "null_resource" "chef_preparation" {
       "sudo chmod 600 /opt/chef-keys/${var.chef_org["short_name"]}-validator.pem",
       "sudo chef-server-ctl install chef-manage",
       "sudo chef-manage-ctl reconfigure --accept-license",
+      "sudo knife ssl fetch -c /opt/chef-client-config/local_root_client.rb",
     ]
   }
 }

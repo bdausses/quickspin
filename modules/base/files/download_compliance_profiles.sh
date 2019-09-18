@@ -13,6 +13,7 @@ cis-sles12-level1 \
 cis-ubuntu12.04lts-level1 \
 cis-ubuntu14.04lts-level1 \
 cis-ubuntu16.04lts-level1-server \
+cis-ubuntu18.04lts-level1-server \
 cis-windows2012r2-level1-domaincontroller
 do
   echo "${PROFILE}"
