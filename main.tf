@@ -8,7 +8,6 @@ provider "aws" {
 
 data "aws_route53_zone" "selected" {
   name         = "${var.domain}"
-  #private_zone = true
 }
 
 module "base_mod" {
@@ -22,7 +21,9 @@ module "base_mod" {
   chef_server_instance_type = "${var.chef_server_instance_type}"
   a2_server_instance_type   = "${var.a2_server_instance_type}"
   chef_user                 = "${local.chef_user}"
-  harvest_and_update_knife  = "${var.harvest_and_update_knife}"
+  harvest_key               = "${var.harvest_key}"
+  local_keys_directory      = "${var.local_keys_directory}"
+  update_knife_override     = "${var.update_knife_override}"
   domain_zone_id            = "${data.aws_route53_zone.selected.zone_id}"
   provision_bldr            = "${var.provision_bldr}"
 }

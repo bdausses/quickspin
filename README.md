@@ -23,7 +23,14 @@ knife_override = "#{home_dir}/.chef/knife-override.rb"
 Chef::Config.from_file(knife_override) if File.exist?(knife_override)
 ```
 
-If you want to use this, make sure your knife.rb file and knife-override.rb file are located at `~/.chef` and then set  `harvest_and_update_knife = true` in your tfvars file.  An example `knife-override.rb` is also included in this repo.
+If you want to use this:
+- make sure your knife.rb file and knife-override.rb file are located at `~/.chef`
+- create a keys directory at `~/.chef/keys` or override that path by setting a value for `local_keys_directory` in your terraform.tfvars
+- set `harvest_key = true` and `update_knife_override = true` in your tfvars file.
+
+An example `knife-override.rb` is also included in this repo.
+
+Ping me if you don't understand this or want to dig deeper here.
 
 ### Centos Sample Nodes
 This module controls spinning up CentOS sample nodes.  It uses the latest available CentOS 7 image.  Control wether or not these nodes spin up by using an integer value for the variable `centos_sample_node_count`.

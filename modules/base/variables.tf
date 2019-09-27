@@ -34,9 +34,14 @@ variable "bldr_server_instance_type" {}
 variable "chef_server_instance_type" {}
 variable "a2_server_instance_type" {}
 
-# This determines if the .pem key gets harvested and if the local
-# knife-override.rb file gets updated.
-variable "harvest_and_update_knife" {}
+# Harvest created user's key file - Set this to true to auto harvest the key.
+variable "harvest_key" {}
+
+# Directory where the harvested key will be placed
+variable "local_keys_directory" {}
+
+# Update the knife-override.rb file.  See README.md for explanation.
+variable "update_knife_override" {}
 
 # Domain Zone ID
 variable "domain_zone_id" {}

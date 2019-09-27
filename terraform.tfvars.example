@@ -30,5 +30,11 @@ sles_sample_node_count = 0
 # Only place a valid A2 license in this space.  If you don't have one or don't want to use it, leave this commented out.
 # a2_license = ""
 
-# Set harvesting and updating for .pem and knife configuration
-# harvest_and_update_knife = true
+# Harvest .pem key file
+harvest_key = true
+
+# Update knife_override.rb
+update_knife_override = true
+
+# Provision Habitat BLDR server
+provision_bldr = false

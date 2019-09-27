@@ -197,48 +197,58 @@ resource "null_resource" "deposit_reporting_token" {
     }
   }
 
-# Harvest user's key and update knife-override.rb
-resource "null_resource" "harvest_key_and_update_knife_override" {
-  #count = "${var.harvest_and_update_knife}"
-  depends_on = [ "null_resource.deposit_reporting_token" ]
-  connection {
-    host        ="${aws_eip.chef_server_eip.public_ip}"
-    user           = "centos"
-    private_key    = "${file("${var.instance_key}")}"
-    }
+  # Harvest user's key and update knife-override.rb
+  resource "null_resource" "harvest_key" {
+    count = var.harvest_key ? 1 : 0
+    depends_on = [ "null_resource.chef_preparation" ]
+    connection {
+      host        ="${aws_eip.chef_server_eip.public_ip}"
+      user           = "centos"
+      private_key    = "${file("${var.instance_key}")}"
+      }
 
-    # Harvest keys, update knife-override.rb, and fetch the Chef server's self signed SSL certificate
-    provisioner "local-exec" {
-      command = "rsync -a -e \"ssh -i ${var.instance_key} -o StrictHostKeyChecking=no\" --rsync-path=\"sudo rsync\" centos@${aws_eip.chef_server_eip.public_ip}:/opt/chef-keys/${var.chef_user["username"]}.pem ~/.chef/keys/${aws_route53_record.chef_server.fqdn}-${var.chef_user["username"]}.pem"
-    }
-    provisioner "local-exec" {
-      command = "rsync -a -e \"ssh -i ${var.instance_key} -o StrictHostKeyChecking=no\" --rsync-path=\"sudo rsync\" centos@${aws_eip.chef_server_eip.public_ip}:/opt/chef-keys/${var.chef_org["short_name"]}-validator.pem ~/.chef/keys/${aws_route53_record.chef_server.fqdn}-${var.chef_org["short_name"]}-validator.pem"
-    }
-    provisioner "local-exec" {
-      command = "gsed -i '/^chef_server_url/ d' ~/.chef/knife-override.rb"
-    }
-    provisioner "local-exec" {
-      command = "gsed -i '/^client_key/ d' ~/.chef/knife-override.rb"
-    }
-    provisioner "local-exec" {
-      command = "gsed -i '/^node_name/ d' ~/.chef/knife-override.rb"
-    }
-    provisioner "local-exec" {
-      command = "echo \"chef_server_url \\\"https://${aws_route53_record.chef_server.fqdn}/organizations/${var.chef_org["short_name"]}\\\"\" | tee -a ~/.chef/knife-override.rb"
-    }
-    provisioner "local-exec" {
-      command = "echo \"client_key \\\"~/.chef/keys/${aws_route53_record.chef_server.fqdn}-${var.chef_user["username"]}.pem\\\"\" | tee -a ~/.chef/knife-override.rb"
-    }
-    provisioner "local-exec" {
-      command = "echo \"node_name \\\"${var.chef_user["username"]}\\\"\" | tee -a ~/.chef/knife-override.rb"
-    }
-    provisioner "local-exec" {
-      command = "knife ssl fetch"
-    }
-    provisioner "local-exec" {
-      command = "knife cookbook upload --include-dependencies chef-client omni_audit"
-    }
-}
+      # Harvest keys
+      provisioner "local-exec" {
+        command = "rsync -a -e \"ssh -i ${var.instance_key} -o StrictHostKeyChecking=no\" --rsync-path=\"sudo rsync\" centos@${aws_eip.chef_server_eip.public_ip}:/opt/chef-keys/${var.chef_user["username"]}.pem ${var.local_keys_directory}/${aws_route53_record.chef_server.fqdn}-${var.chef_user["username"]}.pem"
+      }
+      provisioner "local-exec" {
+        command = "rsync -a -e \"ssh -i ${var.instance_key} -o StrictHostKeyChecking=no\" --rsync-path=\"sudo rsync\" centos@${aws_eip.chef_server_eip.public_ip}:/opt/chef-keys/${var.chef_org["short_name"]}-validator.pem ${var.local_keys_directory}/${aws_route53_record.chef_server.fqdn}-${var.chef_org["short_name"]}-validator.pem"
+      }
+  }
+
+  # Harvest user's key and update knife-override.rb
+  resource "null_resource" "update_knife_override" {
+    count = var.update_knife_override ? 1 : 0
+    depends_on = [ "null_resource.chef_preparation", "null_resource.harvest_key" ]
+    connection {
+      host        ="${aws_eip.chef_server_eip.public_ip}"
+      user           = "centos"
+      private_key    = "${file("${var.instance_key}")}"
+      }
+
+      # Update knife-override.rb, and fetch the Chef server's self signed SSL certificate
+      provisioner "local-exec" {
+        command = "gsed -i '/^chef_server_url/ d' ~/.chef/knife-override.rb"
+      }
+      provisioner "local-exec" {
+        command = "gsed -i '/^client_key/ d' ~/.chef/knife-override.rb"
+      }
+      provisioner "local-exec" {
+        command = "gsed -i '/^node_name/ d' ~/.chef/knife-override.rb"
+      }
+      provisioner "local-exec" {
+        command = "echo \"chef_server_url \\\"https://${aws_route53_record.chef_server.fqdn}/organizations/${var.chef_org["short_name"]}\\\"\" | tee -a ~/.chef/knife-override.rb"
+      }
+      provisioner "local-exec" {
+        command = "echo \"client_key \\\"~/.chef/keys/${aws_route53_record.chef_server.fqdn}-${var.chef_user["username"]}.pem\\\"\" | tee -a ~/.chef/knife-override.rb"
+      }
+      provisioner "local-exec" {
+        command = "echo \"node_name \\\"${var.chef_user["username"]}\\\"\" | tee -a ~/.chef/knife-override.rb"
+      }
+      provisioner "local-exec" {
+        command = "knife ssl fetch"
+      }
+  }
 
 ###################
 # End - Chef Server
@@ -531,94 +541,3 @@ resource "null_resource" "bldr_preparation_2" {
     ]
   }
 }
-#
-# # Deposit reporting token to Chef server, add reporting data and reconfigure
-# resource "null_resource" "deposit_reporting_token" {
-#   depends_on = [ "null_resource.harvest_reporting_token", "null_resource.chef_preparation" ]
-#   connection {
-#     host        ="${aws_eip.chef_server_eip.public_ip}"
-#     user           = "centos"
-#     private_key    = "${file("${var.instance_key}")}"
-#     }
-#
-#     # Deposit reporting token
-#     provisioner "file" {
-#       source         = "/tmp/${aws_route53_record.a2_server.fqdn}_reporting_token.txt"
-#       destination    = "/tmp/${aws_route53_record.a2_server.fqdn}_reporting_token.txt"
-#     }
-#
-#     # Remove that file from local storage
-#     provisioner "local-exec" {
-#       command = "rm /tmp/${aws_route53_record.a2_server.fqdn}_reporting_token.txt"
-#     }
-#
-#     # Add data and reconfigure
-#     provisioner "remote-exec" {
-#       inline = [
-#         "sudo chef-server-ctl set-secret data_collector token \"`cat /tmp/${aws_route53_record.a2_server.fqdn}_reporting_token.txt`\"",
-#         "sudo chef-server-ctl restart nginx",
-#         "sudo chef-server-ctl restart opscode-erchef",
-#         "sudo chef-server-ctl reconfigure"
-#       ]
-#     }
-#   }
-#
-# # Harvest user's key and update knife-override.rb
-# resource "null_resource" "harvest_key_and_update_knife_override" {
-#   count = "${var.harvest_and_update_knife}"
-#   depends_on = [ "null_resource.deposit_reporting_token" ]
-#   connection {
-#     host        ="${aws_eip.chef_server_eip.public_ip}"
-#     user           = "centos"
-#     private_key    = "${file("${var.instance_key}")}"
-#     }
-#
-#     # Harvest keys, update knife-override.rb, and fetch the Chef server's self signed SSL certificate
-#     provisioner "local-exec" {
-#       command = "rsync -a -e \"ssh -i ${var.instance_key} -o StrictHostKeyChecking=no\" --rsync-path=\"sudo rsync\" centos@${aws_eip.chef_server_eip.public_ip}:/opt/chef-keys/${var.chef_user["username"]}.pem ~/.chef/keys/${aws_route53_record.chef_server.fqdn}-${var.chef_user["username"]}.pem"
-#     }
-#     provisioner "local-exec" {
-#       command = "rsync -a -e \"ssh -i ${var.instance_key} -o StrictHostKeyChecking=no\" --rsync-path=\"sudo rsync\" centos@${aws_eip.chef_server_eip.public_ip}:/opt/chef-keys/${var.chef_org["short_name"]}-validator.pem ~/.chef/keys/${aws_route53_record.chef_server.fqdn}-${var.chef_org["short_name"]}-validator.pem"
-#     }
-#     provisioner "local-exec" {
-#       command = "gsed -i '/^chef_server_url/ d' ~/.chef/knife-override.rb"
-#     }
-#     provisioner "local-exec" {
-#       command = "gsed -i '/^client_key/ d' ~/.chef/knife-override.rb"
-#     }
-#     provisioner "local-exec" {
-#       command = "gsed -i '/^node_name/ d' ~/.chef/knife-override.rb"
-#     }
-#     provisioner "local-exec" {
-#       command = "echo \"chef_server_url \\\"https://${aws_route53_record.chef_server.fqdn}/organizations/${var.chef_org["short_name"]}\\\"\" | tee -a ~/.chef/knife-override.rb"
-#     }
-#     provisioner "local-exec" {
-#       command = "echo \"client_key \\\"~/.chef/keys/${aws_route53_record.chef_server.fqdn}-${var.chef_user["username"]}.pem\\\"\" | tee -a ~/.chef/knife-override.rb"
-#     }
-#     provisioner "local-exec" {
-#       command = "echo \"node_name \\\"${var.chef_user["username"]}\\\"\" | tee -a ~/.chef/knife-override.rb"
-#     }
-#     provisioner "local-exec" {
-#       command = "knife ssl fetch"
-#     }
-#     provisioner "local-exec" {
-#       command = "knife cookbook upload --include-dependencies chef-client omni_audit"
-#     }
-
-# Grab cert:
-# openssl s_client -showcerts -connect bdausses-test.automate-demo.com:443 </dev/null 2>/dev/null|openssl x509 -outform PEM > /tmp/mycertfile.pem
-
-
-###################
-# End - Bldr Server
-###################
-
-
-# List Outputs
-#output "Chef Automate Host Name" {
-#    value = "${aws_route53_record.a2_server.fqdn}"
-#}
-
-#output "Chef Server Host Name" {
-#    value = "${aws_route53_record.chef_server.fqdn}"
-#}

@@ -1,3 +1,6 @@
+###############
+# AWS variables
+###############
 # Region
 variable "region" {
   default = "us-east-2" # Ohio
@@ -46,6 +49,14 @@ locals {
   )}"
 }
 
+# DNS Domain Name
+variable "domain" {
+  default = "chef-demo.com"
+}
+#####################
+# END - AWS variables
+#####################
+
 # Define Chef User variables and put them in a map
 variable "email" {
   default = "chef_admin@example.com"
@@ -69,9 +80,18 @@ locals {
   )}"
 }
 
-# Harvest created user's key and update knife-override.rb settings
-# Note:  Set this to true to auto harvest the key and update your knife-override.rb file.
-variable "harvest_and_update_knife" {
+# Harvest created user's key file - Set this to true to auto harvest the key.
+variable "harvest_key" {
+  default = false
+}
+
+# Directory where the harvested key will be placed
+variable "local_keys_directory" {
+  default = "~/.chef/keys"
+}
+
+# Update the knife-override.rb file.  See README.md for explanation.
+variable "update_knife_override" {
   default = false
 }
 
@@ -88,6 +108,14 @@ variable "a2_admin_password" {
   default = "workstation!"
 }
 
+# Bldr Server - Set this to true if you would like to integrate a Bldr Server
+variable "provision_bldr" {
+  default = false
+}
+
+##############
+# Sample nodes
+##############
 # Centos Sample nodes
 variable "centos_sample_node_count" {
   default = 0
@@ -106,14 +134,4 @@ variable "sles_sample_node_count" {
 # Ubuntu Sample nodes
 variable "ubuntu_sample_node_count" {
   default = 0
-}
-
-# DNS Domain Name
-variable "domain" {
-  default = "chef-demo.com"
-}
-
-# Bldr Server
-variable "provision_bldr" {
-  default = false
 }
