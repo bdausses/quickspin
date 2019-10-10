@@ -14,3 +14,23 @@ output "a2_server_url" {
 output "bldr_server_fqdn" {
   value            = module.base_mod.bldr_server_fqdn
 }
+
+# Centos Sample nodes
+output "centos_sample_nodes" {
+  value            = module.centos_sample_nodes.centos_sample_nodes
+}
+
+# RHEL Sample nodes
+output "rhel_sample_nodes" {
+  value            = module.rhel_sample_nodes.rhel_sample_nodes
+}
+
+# SLES Sample nodes
+output "sles_sample_nodes" {
+  value            = module.sles_sample_nodes.sles_sample_nodes
+}
+
+# Centos Sample nodes
+output "ubuntu_sample_nodes" {
+  value            = module.ubuntu_sample_nodes.ubuntu_sample_nodes
+}
