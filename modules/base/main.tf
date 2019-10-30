@@ -49,14 +49,7 @@ resource "aws_route53_record" "chef_server" {
   name    = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-chef"
   type    = "A"
   ttl     = "60"
-  records = ["${aws_eip.chef_server_eip.public_ip}"]
-}
-
-# Chef server Elastic IP
-resource "aws_eip" "chef_server_eip" {
-  instance = "${aws_instance.chef_server.id}"
-  depends_on = ["aws_instance.chef_server"]
-  vpc      = true
+  records = ["${aws_instance.chef_server.public_ip}"]
 }
 
 # Set up Chef Server's dna.json
@@ -113,7 +106,7 @@ resource "null_resource" "chef_preparation" {
     }
 
     connection {
-      host        ="${aws_eip.chef_server_eip.public_ip}"
+      host        ="${aws_instance.chef_server.public_ip}"
       user           = "centos"
       private_key    = "${file("${var.instance_key}")}"
       }
@@ -170,7 +163,7 @@ resource "null_resource" "chef_preparation" {
 resource "null_resource" "deposit_reporting_token" {
   depends_on = [ "null_resource.harvest_reporting_token", "null_resource.chef_preparation" ]
   connection {
-    host        ="${aws_eip.chef_server_eip.public_ip}"
+    host        ="${aws_instance.chef_server.public_ip}"
     user           = "centos"
     private_key    = "${file("${var.instance_key}")}"
     }
@@ -202,17 +195,17 @@ resource "null_resource" "deposit_reporting_token" {
     count = var.harvest_key ? 1 : 0
     depends_on = [ "null_resource.chef_preparation" ]
     connection {
-      host        ="${aws_eip.chef_server_eip.public_ip}"
+      host        ="${aws_instance.chef_server.public_ip}"
       user           = "centos"
       private_key    = "${file("${var.instance_key}")}"
       }
 
       # Harvest keys
       provisioner "local-exec" {
-        command = "rsync -a -e \"ssh -i ${var.instance_key} -o StrictHostKeyChecking=no\" --rsync-path=\"sudo rsync\" centos@${aws_eip.chef_server_eip.public_ip}:/opt/chef-keys/${var.chef_user["username"]}.pem ${var.local_keys_directory}/${aws_route53_record.chef_server.fqdn}-${var.chef_user["username"]}.pem"
+        command = "rsync -a -e \"ssh -i ${var.instance_key} -o StrictHostKeyChecking=no\" --rsync-path=\"sudo rsync\" centos@${aws_instance.chef_server.public_ip}:/opt/chef-keys/${var.chef_user["username"]}.pem ${var.local_keys_directory}/${aws_route53_record.chef_server.fqdn}-${var.chef_user["username"]}.pem"
       }
       provisioner "local-exec" {
-        command = "rsync -a -e \"ssh -i ${var.instance_key} -o StrictHostKeyChecking=no\" --rsync-path=\"sudo rsync\" centos@${aws_eip.chef_server_eip.public_ip}:/opt/chef-keys/${var.chef_org["short_name"]}-validator.pem ${var.local_keys_directory}/${aws_route53_record.chef_server.fqdn}-${var.chef_org["short_name"]}-validator.pem"
+        command = "rsync -a -e \"ssh -i ${var.instance_key} -o StrictHostKeyChecking=no\" --rsync-path=\"sudo rsync\" centos@${aws_instance.chef_server.public_ip}:/opt/chef-keys/${var.chef_org["short_name"]}-validator.pem ${var.local_keys_directory}/${aws_route53_record.chef_server.fqdn}-${var.chef_org["short_name"]}-validator.pem"
       }
   }
 
@@ -221,7 +214,7 @@ resource "null_resource" "deposit_reporting_token" {
     count = var.update_knife_override ? 1 : 0
     depends_on = [ "null_resource.chef_preparation", "null_resource.harvest_key" ]
     connection {
-      host        ="${aws_eip.chef_server_eip.public_ip}"
+      host        ="${aws_instance.chef_server.public_ip}"
       user           = "centos"
       private_key    = "${file("${var.instance_key}")}"
       }
@@ -264,14 +257,7 @@ resource "aws_route53_record" "a2_server" {
   name    = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-automate"
   type    = "A"
   ttl     = "60"
-  records = ["${aws_eip.a2_server_eip.public_ip}"]
-}
-
-# A2 server Elastic IP
-resource "aws_eip" "a2_server_eip" {
-  instance = "${aws_instance.a2_server.id}"
-  depends_on = ["aws_instance.a2_server"]
-  vpc      = true
+  records = ["${aws_instance.a2_server.public_ip}"]
 }
 
 # Set up A2 license file
@@ -324,7 +310,7 @@ resource "null_resource" "a2_preparation" {
     }
 
     connection {
-      host        ="${aws_eip.a2_server_eip.public_ip}"
+      host        ="${aws_instance.a2_server.public_ip}"
       user           = "centos"
       private_key    = "${file("${var.instance_key}")}"
       }
@@ -389,14 +375,14 @@ resource "null_resource" "harvest_reporting_token" {
   depends_on = [ "null_resource.a2_preparation" ]
 
     connection {
-      host        ="${aws_eip.a2_server_eip.public_ip}"
+      host        ="${aws_instance.a2_server.public_ip}"
       user           = "centos"
       private_key    = "${file("${var.instance_key}")}"
       }
 
       # Copy back reporting token
       provisioner "local-exec" {
-        command = "scp -o stricthostkeychecking=no -i ${var.instance_key} centos@${aws_eip.a2_server_eip.public_ip}:/tmp/reporting_token /tmp/${aws_route53_record.a2_server.fqdn}_reporting_token.txt"
+        command = "scp -o stricthostkeychecking=no -i ${var.instance_key} centos@${aws_instance.a2_server.public_ip}:/tmp/reporting_token /tmp/${aws_route53_record.a2_server.fqdn}_reporting_token.txt"
       }
 
       # Remove harvested file and initial credentials file.
@@ -423,15 +409,7 @@ resource "aws_route53_record" "bldr_server" {
   name    = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-bldr"
   type    = "A"
   ttl     = "60"
-  records = ["${aws_eip.bldr_server_eip[count.index].public_ip}"]
-}
-
-# Bldr server Elastic IP
-resource "aws_eip" "bldr_server_eip" {
-  count = var.provision_bldr ? 1 : 0
-  instance = "${aws_instance.bldr_server[count.index].id}"
-  depends_on = ["aws_instance.bldr_server"]
-  vpc      = true
+  records = ["${aws_instance.bldr_server[count.index].public_ip}"]
 }
 
 # Set up Bldr's bldr.env file
@@ -487,7 +465,7 @@ resource "null_resource" "bldr_preparation" {
     }
 
     connection {
-      host        ="${aws_eip.bldr_server_eip[count.index].public_ip}"
+      host        ="${aws_instance.bldr_server[count.index].public_ip}"
       user           = "centos"
       private_key    = "${file("${var.instance_key}")}"
       }
@@ -528,7 +506,7 @@ resource "null_resource" "bldr_preparation_2" {
     }
 
     connection {
-      host        ="${aws_eip.bldr_server_eip[count.index].public_ip}"
+      host        ="${aws_instance.bldr_server[count.index].public_ip}"
       user           = "centos"
       private_key    = "${file("${var.instance_key}")}"
       }
