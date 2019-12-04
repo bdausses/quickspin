@@ -72,6 +72,14 @@ data "template_file" "local_root_client" {
   }
 }
 
+# Set up certgen.conf
+data "template_file" "chef_server_certgen_conf" {
+  template = "${file("${path.module}/files/certgen.conf.tpl")}"
+  vars = {
+    fqdn = "${aws_route53_record.chef_server.fqdn}"
+  }
+}
+
 # Spin up the Chef server
 resource "aws_instance" "chef_server" {
   ami           = "${data.aws_ami.centos.id}"
@@ -123,13 +131,19 @@ resource "null_resource" "chef_preparation" {
       destination    = "/tmp/local_root_client.rb"
     }
 
+    # Write certgen.conf
+    provisioner "file" {
+      content        = "${data.template_file.chef_server_certgen_conf.rendered}"
+      destination    = "/tmp/certgen.conf"
+    }
+
   # Install Chef Server
   provisioner "remote-exec" {
     inline = [
       "sudo yum install wget -y",
       "sudo mkdir /opt/chef-ssl && sudo chmod 755 /opt/chef-ssl",
       "cd /opt/chef-ssl",
-      "sudo openssl req -x509 -newkey rsa:4096 -keyout chef_server.key -out chef_server.pem -nodes -days 365 -subj '/C=US/ST=WA/O=Chef Software/CN=${aws_route53_record.chef_server.fqdn}'",
+      "sudo openssl req -new -x509 -nodes -keyout chef_server.key -out chef_server.pem -config /tmp/certgen.conf",
       "sudo chmod 600 /opt/chef-ssl/chef_server.pem /opt/chef-ssl/chef_server.key",
       "curl -L https://www.chef.io/chef/install.sh | sudo bash",
       "sudo mkdir -p /var/chef/cache /var/chef/cookbooks",
@@ -276,6 +290,14 @@ data "template_file" "enable_bldr_toml" {
   }
 }
 
+# Set up certgen.conf
+data "template_file" "a2_server_certgen_conf" {
+  template = "${file("${path.module}/files/certgen.conf.tpl")}"
+  vars = {
+    fqdn = "${aws_route53_record.a2_server.fqdn}"
+  }
+}
+
 # Spin up the A2 server
 resource "aws_instance" "a2_server" {
     ami           = "${data.aws_ami.centos.id}"
@@ -339,14 +361,24 @@ resource "null_resource" "a2_preparation" {
       destination    = "/tmp/enable_bldr.toml"
     }
 
+    # Write certgen.conf
+    provisioner "file" {
+      content        = "${data.template_file.a2_server_certgen_conf.rendered}"
+      destination    = "/tmp/certgen.conf"
+    }
+
     # Install Automate 2
     provisioner "remote-exec" {
       inline = [
         "sudo yum install -y epel-release",
         "sudo yum install -y jq",
+        "sudo mkdir /opt/chef-ssl && sudo chmod 755 /opt/chef-ssl",
+        "cd /opt/chef-ssl",
+        "sudo openssl req -new -x509 -nodes -keyout a2_server.key -out a2_server.pem -config /tmp/certgen.conf",
+        "sudo chmod 600 /opt/chef-ssl/a2_server.pem /opt/chef-ssl/a2_server.key",
         "cd /tmp",
         "curl -s https://packages.chef.io/files/current/latest/chef-automate-cli/chef-automate_linux_amd64.zip | gunzip - > chef-automate && chmod +x chef-automate",
-        "sudo ./chef-automate init-config --fqdn ${aws_route53_record.a2_server.fqdn}",
+        "sudo ./chef-automate init-config --fqdn ${aws_route53_record.a2_server.fqdn} --certificate /opt/chef-ssl/a2_server.pem --private-key /opt/chef-ssl/a2_server.key",
         "sudo /usr/sbin/sysctl -w vm.max_map_count=262144",
         "sudo /usr/sbin/sysctl -w vm.dirty_expire_centisecs=20000",
         "echo 'vm.max_map_count=262144' | sudo tee -a /etc/sysctl.conf",
