@@ -9,8 +9,8 @@ days = 364
 [dn]
 C = US
 ST = WA
-L = Seattle
-O = Chef
+O = Chef Software
+CN = ${fqdn}
 
 [v3_req]
 subjectAltName = @alt_names
