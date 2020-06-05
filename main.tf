@@ -15,6 +15,7 @@ module "base_mod" {
   common_tags               = "${local.common_tags}"
   a2_license                = "${var.a2_license}"
   a2_admin_password         = "${var.a2_admin_password}"
+  domain                    = "${var.domain}"
   key_name                  = "${var.key_name}"
   instance_key              = "${var.instance_key}"
   bldr_server_instance_type = "${var.bldr_server_instance_type}"
@@ -31,6 +32,7 @@ module "base_mod" {
 module "centos_sample_nodes" {
   source                = "./modules/centos_sample_nodes"
   common_tags           = "${local.common_tags}"
+  domain                = "${var.domain}"
   key_name              = "${var.key_name}"
   instance_key          = "${var.instance_key}"
   node_count            = "${var.centos_sample_node_count}"
@@ -40,6 +42,7 @@ module "centos_sample_nodes" {
 module "rhel_sample_nodes" {
   source                = "./modules/rhel_sample_nodes"
   common_tags           = "${local.common_tags}"
+  domain                = "${var.domain}"
   key_name              = "${var.key_name}"
   instance_key          = "${var.instance_key}"
   node_count            = "${var.rhel_sample_node_count}"
@@ -49,6 +52,7 @@ module "rhel_sample_nodes" {
 module "sles_sample_nodes" {
   source                = "./modules/sles_sample_nodes"
   common_tags           = "${local.common_tags}"
+  domain                = "${var.domain}"
   key_name              = "${var.key_name}"
   instance_key          = "${var.instance_key}"
   node_count            = "${var.sles_sample_node_count}"
@@ -58,6 +62,7 @@ module "sles_sample_nodes" {
 module "ubuntu_sample_nodes" {
   source                = "./modules/ubuntu_sample_nodes"
   common_tags           = "${local.common_tags}"
+  domain                = "${var.domain}"
   key_name              = "${var.key_name}"
   instance_key          = "${var.instance_key}"
   node_count            = "${var.ubuntu_sample_node_count}"

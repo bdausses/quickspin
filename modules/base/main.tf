@@ -115,8 +115,9 @@ resource "null_resource" "chef_preparation" {
 
     connection {
       host        ="${aws_instance.chef_server.public_ip}"
-      user           = "centos"
-      private_key    = "${file("${var.instance_key}")}"
+      user        = "centos"
+      agent       = true
+      #private_key = "${file("${var.instance_key}")}"
       }
 
     # Write .chef/dna.json for chef-solo run
@@ -178,8 +179,9 @@ resource "null_resource" "deposit_reporting_token" {
   depends_on = [ "null_resource.harvest_reporting_token", "null_resource.chef_preparation" ]
   connection {
     host        ="${aws_instance.chef_server.public_ip}"
-    user           = "centos"
-    private_key    = "${file("${var.instance_key}")}"
+    user        = "centos"
+    agent       = true
+    #private_key = "${file("${var.instance_key}")}"
     }
 
     # Deposit reporting token
@@ -210,8 +212,9 @@ resource "null_resource" "deposit_reporting_token" {
     depends_on = [ "null_resource.chef_preparation" ]
     connection {
       host        ="${aws_instance.chef_server.public_ip}"
-      user           = "centos"
-      private_key    = "${file("${var.instance_key}")}"
+      user        = "centos"
+      agent       = true
+      #private_key = "${file("${var.instance_key}")}"
       }
 
       # Harvest keys
@@ -229,8 +232,9 @@ resource "null_resource" "deposit_reporting_token" {
     depends_on = [ "null_resource.chef_preparation", "null_resource.harvest_key" ]
     connection {
       host        ="${aws_instance.chef_server.public_ip}"
-      user           = "centos"
-      private_key    = "${file("${var.instance_key}")}"
+      user        = "centos"
+      agent       = true
+      #private_key = "${file("${var.instance_key}")}"
       }
 
       # Update knife-override.rb, and fetch the Chef server's self signed SSL certificate
@@ -286,7 +290,7 @@ data "template_file" "a2_license" {
 data "template_file" "enable_bldr_toml" {
   template = "${file("${path.module}/files/enable_bldr.toml.tpl")}"
   vars = {
-    bldr_fqdn = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-bldr.chef-demo.com"
+    bldr_fqdn = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-bldr.${var.domain}"
   }
 }
 
@@ -333,8 +337,9 @@ resource "null_resource" "a2_preparation" {
 
     connection {
       host        ="${aws_instance.a2_server.public_ip}"
-      user           = "centos"
-      private_key    = "${file("${var.instance_key}")}"
+      user        = "centos"
+      agent       = true
+      #private_key = "${file("${var.instance_key}")}"
       }
 
     # Write /tmp/a2_license
@@ -387,7 +392,7 @@ resource "null_resource" "a2_preparation" {
         "bash /tmp/a2_license_apply.sh",
         "sudo rm /tmp/a2_license_apply.sh",
         "sudo rm /tmp/a2_license",
-        "export TOK=`sudo chef-automate admin-token`",
+        "export TOK=`sudo chef-automate iam token create admin_token --admin`",
         "curl -sk -H \"api-token: $TOK\" -H \"Content-Type: application/json\" -d '{\"description\":\"Reporting Token - ${aws_route53_record.chef_server.fqdn}\",\"active\":true}' https://${aws_route53_record.a2_server.fqdn}/api/v0/auth/tokens | jq -r .value > /tmp/reporting_token",
         "sudo chown centos /tmp/reporting_token",
         "sudo chmod 600 /tmp/reporting_token",
@@ -408,8 +413,9 @@ resource "null_resource" "harvest_reporting_token" {
 
     connection {
       host        ="${aws_instance.a2_server.public_ip}"
-      user           = "centos"
-      private_key    = "${file("${var.instance_key}")}"
+      user        = "centos"
+      agent       = true
+      #private_key = "${file("${var.instance_key}")}"
       }
 
       # Copy back reporting token
@@ -448,8 +454,8 @@ resource "aws_route53_record" "bldr_server" {
 data "template_file" "bldr_env" {
   template = "${file("${path.module}/files/bldr.env.tpl")}"
   vars = {
-    bldr_fqdn = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-bldr.chef-demo.com"
-    a2_fqdn   = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-automate.chef-demo.com"
+    bldr_fqdn = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-bldr.${var.domain}"
+    a2_fqdn   = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-automate.${var.domain}"
   }
 }
 
@@ -457,7 +463,7 @@ data "template_file" "bldr_env" {
 data "template_file" "populate_bldr" {
   template = "${file("${path.module}/files/populate_bldr.sh.tpl")}"
   vars = {
-    bldr_fqdn = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-bldr.chef-demo.com"
+    bldr_fqdn = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-bldr.${var.domain}"
   }
 }
 
@@ -498,8 +504,9 @@ resource "null_resource" "bldr_preparation" {
 
     connection {
       host        ="${aws_instance.bldr_server[count.index].public_ip}"
-      user           = "centos"
-      private_key    = "${file("${var.instance_key}")}"
+      user        = "centos"
+      agent       = true
+      #private_key = "${file("${var.instance_key}")}"
       }
 
     # Write bldr.env so that bldr can be installed
@@ -539,14 +546,15 @@ resource "null_resource" "bldr_preparation_2" {
 
     connection {
       host        ="${aws_instance.bldr_server[count.index].public_ip}"
-      user           = "centos"
-      private_key    = "${file("${var.instance_key}")}"
+      user        = "centos"
+      agent       = true
+      #private_key = "${file("${var.instance_key}")}"
       }
 
   # Harvest A2 SSL cert and restart Bldr
   provisioner "remote-exec" {
     inline = [
-      "openssl s_client -showcerts -connect ${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-automate.chef-demo.com:443 </dev/null 2>/dev/null|openssl x509 -outform PEM | sudo tee -a $(hab pkg path core/cacerts)/ssl/cert.pem",
+      "openssl s_client -showcerts -connect ${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-automate.${var.domain}:443 </dev/null 2>/dev/null|openssl x509 -outform PEM | sudo tee -a $(hab pkg path core/cacerts)/ssl/cert.pem",
       "sudo systemctl restart hab-sup",
     ]
   }

@@ -7,15 +7,15 @@ variable "region" {
 }
 
 variable "bldr_server_instance_type" {
-  default = "c4.xlarge"
+  default = "t3.medium"
 }
 
 variable "chef_server_instance_type" {
-  default = "m5.large"
+  default = "t3.medium"
 }
 
 variable "a2_server_instance_type" {
-  default = "m5.large"
+  default = "t3.medium"
 }
 
 # Key Name - The name of your key at AWS.
@@ -51,7 +51,7 @@ locals {
 
 # DNS Domain Name
 variable "domain" {
-  default = "chef-demo.com"
+  default = "quickbad.com"
 }
 #####################
 # END - AWS variables
@@ -59,7 +59,7 @@ variable "domain" {
 
 # Define Chef User variables and put them in a map
 variable "email" {
-  default = "chef_admin@example.com"
+  default = "chef_admin@quickbad.com"
 }
 variable "first_name" {
   default = "Chef"

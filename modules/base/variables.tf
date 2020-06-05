@@ -1,6 +1,9 @@
 # Key Name - The name of your key at AWS.
 variable "key_name" {}
 
+# Domain - The domain name used
+variable "domain" {}
+
 # Instance Key - The local copy of your key file.
 variable "instance_key" {}
 
