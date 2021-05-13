@@ -31,6 +31,7 @@ resource "aws_instance" "centos_sample_node" {
     "X-Role", "CentOS Sample Node ${count.index + 1}"
     )
   )}"
+  monitoring = true
 }
 
 # CentOS sample nodes DNS entry

@@ -28,6 +28,7 @@ resource "aws_instance" "ubuntu_sample_node" {
     "X-Role", "Ubuntu Sample Node ${count.index + 1}"
     )
   )}"
+  monitoring = true
 }
 
 # Ubuntu sample nodes DNS entry
