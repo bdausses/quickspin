@@ -30,6 +30,7 @@ resource "aws_instance" "sles_sample_node" {
     )
   )}"
   monitoring = true
+  ebs_optimized = true
 }
 
 # SLES sample nodes DNS entry
