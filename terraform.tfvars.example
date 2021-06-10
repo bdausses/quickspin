@@ -12,6 +12,9 @@ tag_production = "No"
 tag_project = "atlantis"
 tag_sleep = "true"
 tag_ttl = "2"
+region = "us-eas2-2"
+aws_profile = "default"
+aws_credentials_file="~/.aws/credentials"
 
 # Define Chef User
 email = "joe_user@acme.io"

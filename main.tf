@@ -3,7 +3,9 @@ terraform {
 }
 
 provider "aws" {
-  region     = "${var.region}"
+  region                  = "${var.region}"
+  profile                 = "${var.aws_profile}"
+  shared_credentials_file = "${var.aws_credentials_file}"
 }
 
 data "aws_route53_zone" "selected" {
