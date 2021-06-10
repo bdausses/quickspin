@@ -29,6 +29,7 @@ resource "aws_instance" "ubuntu_sample_node" {
     )
   )}"
   monitoring = true
+  ebs_optimized = true
 }
 
 # Ubuntu sample nodes DNS entry

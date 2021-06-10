@@ -105,6 +105,7 @@ resource "aws_instance" "chef_server" {
       )
   )}"
   monitoring = true
+  ebs_optimized = true
 }
 
 # Post-provisioning steps for Chef server
@@ -328,6 +329,7 @@ resource "aws_instance" "a2_server" {
       )
     )}"
   monitoring = true
+  ebs_optimized = true
   }
 
 # Post-provisioning steps for A2 server

@@ -30,6 +30,7 @@ resource "aws_instance" "rhel_sample_node" {
     )
   )}"
   monitoring = true
+  ebs_optimized = true
 }
 
 # RHEL sample nodes DNS entry
