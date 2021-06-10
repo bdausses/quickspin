@@ -29,6 +29,8 @@ resource "aws_instance" "sles_sample_node" {
     "X-Role", "SLES 12 Sample Node ${count.index + 1}"
     )
   )}"
+  monitoring = true
+  ebs_optimized = true
 }
 
 # SLES sample nodes DNS entry

@@ -104,6 +104,8 @@ resource "aws_instance" "chef_server" {
       "X-Role", "Chef Server"
       )
   )}"
+  monitoring = true
+  ebs_optimized = true
 }
 
 # Post-provisioning steps for Chef server
@@ -326,6 +328,8 @@ resource "aws_instance" "a2_server" {
         "X-Role", "Chef Server"
       )
     )}"
+  monitoring = true
+  ebs_optimized = true
   }
 
 # Post-provisioning steps for A2 server
@@ -492,6 +496,7 @@ resource "aws_instance" "bldr_server" {
       "X-Role", "On-Prem Bldr Server"
       )
   )}"
+  monitoring = true
 }
 
 # Post-provisioning steps for Bldr server

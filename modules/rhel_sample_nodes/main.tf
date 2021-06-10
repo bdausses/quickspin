@@ -29,6 +29,8 @@ resource "aws_instance" "rhel_sample_node" {
     "X-Role", "RHEL 7 Sample Node ${count.index + 1}"
     )
   )}"
+  monitoring = true
+  ebs_optimized = true
 }
 
 # RHEL sample nodes DNS entry
