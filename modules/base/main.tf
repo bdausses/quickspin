@@ -85,7 +85,7 @@ resource "aws_instance" "chef_server" {
   ami           = "${data.aws_ami.centos.id}"
   instance_type = "${var.chef_server_instance_type}"
   key_name      = "${var.key_name}"
-  security_groups = ["${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-allow-all"]
+  security_groups = [aws_security_group.allow-all.id]
   root_block_device {
     volume_size = "25"
     delete_on_termination = true
@@ -307,7 +307,7 @@ resource "aws_instance" "a2_server" {
     ami           = "${data.aws_ami.centos.id}"
     instance_type = "${var.a2_server_instance_type}"
     key_name      = "${var.key_name}"
-    security_groups = ["${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-allow-all"]
+    security_groups = [aws_security_group.allow-all.id]
     root_block_device {
       volume_size = "25"
       delete_on_termination = true
@@ -473,7 +473,7 @@ resource "aws_instance" "bldr_server" {
   ami           = "${data.aws_ami.centos.id}"
   instance_type = "${var.bldr_server_instance_type}"
   key_name      = "${var.key_name}"
-  security_groups = ["${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-allow-all"]
+  security_groups = [aws_security_group.allow-all.id]
   root_block_device {
     volume_size = "50"
     delete_on_termination = true

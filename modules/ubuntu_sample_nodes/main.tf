@@ -20,7 +20,7 @@ resource "aws_instance" "ubuntu_sample_node" {
   count         = "${var.node_count}"
   instance_type = "t2.micro"
   key_name      = "${var.key_name}"
-  security_groups = ["${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-allow-all"]
+  security_groups = [aws_security_group.allow-all.id]
   tags = "${merge(
   var.common_tags,
   map(
