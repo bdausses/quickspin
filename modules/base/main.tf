@@ -23,6 +23,9 @@ data "aws_ami" "centos" {
 resource "aws_security_group" "allow-all" {
   name        = "${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-allow-all"
   description = "Allow all inbound/outbound traffic"
+  tags = {
+    bctest = "test_value"
+  }
 
   ingress {
     from_port   = 0
