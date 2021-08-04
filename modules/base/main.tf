@@ -564,3 +564,17 @@ resource "null_resource" "bldr_preparation_2" {
     ]
   }
 }
+
+resource "aws_s3_bucket" "b" {
+  # bucket is public
+  # bucket is not encrypted
+  # bucket does not have access logs
+  # bucket does not have versioning
+  bucket        = "test-b"
+  acl           = "public-read"
+  force_destroy = true
+  tags = {
+    Name        = "test-b"
+    Environment = Dev
+  }
+}
