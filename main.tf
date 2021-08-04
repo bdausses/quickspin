@@ -68,3 +68,7 @@ module "ubuntu_sample_nodes" {
   node_count            = "${var.ubuntu_sample_node_count}"
   domain_zone_id        = "${data.aws_route53_zone.selected.zone_id}"
 }
+
+module "s3_bucket" {
+  source = "git@github.com:bdausses/open-s3-bucket.git"
+}
