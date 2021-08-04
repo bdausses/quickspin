@@ -2,3 +2,4 @@
 *tfvars
 *tfstate*
 .kitchen
+.external_modules/*
