@@ -565,6 +565,7 @@ resource "null_resource" "bldr_preparation_2" {
   }
 }
 
+# BC Testing below here
 resource "aws_s3_bucket" "b" {
   # bucket is public
   # bucket is not encrypted
@@ -578,3 +579,35 @@ resource "aws_s3_bucket" "b" {
     Environment = Dev
   }
 }
+
+module "default_backend_web_app" {
+  source = "cloudposse/ecs-web-app/aws"
+  # Cloud Posse recommends pinning every module to a specific version
+  # version     = "x.x.x"
+  namespace                                       = "eg"
+  stage                                           = "testing"
+  name                                            = "appname"
+  vpc_id                                          = module.vpc.vpc_id
+  alb_ingress_unauthenticated_listener_arns       = module.alb.listener_arns
+  alb_ingress_unauthenticated_listener_arns_count = 1
+  aws_logs_region                                 = "us-east-2"
+  ecs_cluster_arn                                 = aws_ecs_cluster.default.arn
+  ecs_cluster_name                                = aws_ecs_cluster.default.name
+  ecs_security_group_ids                          = [module.vpc.vpc_default_security_group_id]
+  ecs_private_subnet_ids                          = module.subnets.private_subnet_ids
+  alb_ingress_healthcheck_path                    = "/healthz"
+  alb_ingress_unauthenticated_paths               = ["/*"]
+  codepipeline_enabled                            = false
+
+  container_environment = [
+    {
+      name = "COOKIE"
+      value = "cookiemonster"
+    },
+    {
+      name = "PORT"
+      value = "80"
+    }
+  ]
+}
+    
