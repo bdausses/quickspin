@@ -565,16 +565,17 @@ resource "null_resource" "bldr_preparation_2" {
   }
 }
 
-resource "aws_s3_bucket" "b" {
-  # bucket is public
-  # bucket is not encrypted
-  # bucket does not have access logs
-  # bucket does not have versioning
-  bucket        = "test-b"
-  acl           = "public-read"
-  force_destroy = true
-  tags = {
-    Name        = "test-b"
-    Environment = Dev
-  }
+# Bridgecrew testing below here:
+module "s3_bucket" {
+  source = "cloudposse/s3-bucket/aws"
+  # Cloud Posse recommends pinning every module to a specific version
+  # version = "x.x.x"
+  acl                      = "public-read"
+  enabled                  = true
+  user_enabled             = true
+  versioning_enabled       = false
+  allowed_bucket_actions   = ["s3:GetObject", "s3:ListBucket", "s3:GetBucketLocation"]
+  name                     = "app"
+  stage                    = "test"
+  namespace                = "eg"
 }
