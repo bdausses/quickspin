@@ -82,6 +82,7 @@ data "template_file" "chef_server_certgen_conf" {
 
 # Spin up the Chef server
 resource "aws_instance" "chef_server" {
+	# checkov:skip=CKV_AWS_8: This is a test reason to skip TEST
   ami           = "${data.aws_ami.centos.id}"
   instance_type = "${var.chef_server_instance_type}"
   key_name      = "${var.key_name}"
@@ -110,7 +111,7 @@ resource "aws_instance" "chef_server" {
 
 # Post-provisioning steps for Chef server
 resource "null_resource" "chef_preparation" {
-  depends_on = ["aws_route53_record.chef_server", "aws_route53_record.a2_server"]
+  depends_on = [aws_route53_record.chef_server, aws_route53_record.a2_server]
     triggers = {
         instance = "${aws_instance.chef_server.id}"
     }
@@ -178,7 +179,7 @@ resource "null_resource" "chef_preparation" {
 
 # Deposit reporting token to Chef server, add reporting data and reconfigure
 resource "null_resource" "deposit_reporting_token" {
-  depends_on = [ "null_resource.harvest_reporting_token", "null_resource.chef_preparation" ]
+  depends_on = [ null_resource.harvest_reporting_token, null_resource.chef_preparation ]
   connection {
     host        ="${aws_instance.chef_server.public_ip}"
     user        = "centos"
@@ -211,7 +212,7 @@ resource "null_resource" "deposit_reporting_token" {
   # Harvest user's key and update knife-override.rb
   resource "null_resource" "harvest_key" {
     count = var.harvest_key ? 1 : 0
-    depends_on = [ "null_resource.chef_preparation" ]
+    depends_on = [ null_resource.chef_preparation ]
     connection {
       host        ="${aws_instance.chef_server.public_ip}"
       user        = "centos"
@@ -231,7 +232,7 @@ resource "null_resource" "deposit_reporting_token" {
   # Harvest user's key and update knife-override.rb
   resource "null_resource" "update_knife_override" {
     count = var.update_knife_override ? 1 : 0
-    depends_on = [ "null_resource.chef_preparation", "null_resource.harvest_key" ]
+    depends_on = [ null_resource.chef_preparation, null_resource.harvest_key ]
     connection {
       host        ="${aws_instance.chef_server.public_ip}"
       user        = "centos"
@@ -334,7 +335,7 @@ resource "aws_instance" "a2_server" {
 
 # Post-provisioning steps for A2 server
 resource "null_resource" "a2_preparation" {
-  depends_on = ["aws_route53_record.a2_server"]
+  depends_on = [ aws_route53_record.a2_server ]
     triggers = {
         instance = "${aws_instance.a2_server.id}"
     }
@@ -413,7 +414,7 @@ resource "null_resource" "a2_preparation" {
 
 # Harvest files
 resource "null_resource" "harvest_reporting_token" {
-  depends_on = [ "null_resource.a2_preparation" ]
+  depends_on = [ null_resource.a2_preparation ]
 
     connection {
       host        ="${aws_instance.a2_server.public_ip}"
@@ -497,12 +498,14 @@ resource "aws_instance" "bldr_server" {
       )
   )}"
   monitoring = true
+  ebs_optimized = true
 }
+
 
 # Post-provisioning steps for Bldr server
 resource "null_resource" "bldr_preparation" {
   count = var.provision_bldr ? 1 : 0
-  depends_on = ["aws_route53_record.bldr_server", "aws_route53_record.a2_server"]
+  depends_on = [ aws_route53_record.bldr_server, aws_route53_record.a2_server ]
     triggers = {
         instance = "${aws_instance.bldr_server[count.index].id}"
     }
@@ -542,9 +545,9 @@ resource "null_resource" "bldr_preparation" {
 
 resource "null_resource" "bldr_preparation_2" {
   count = var.provision_bldr ? 1 : 0
-  depends_on = ["aws_route53_record.bldr_server",
-                "null_resource.a2_preparation",
-                "null_resource.bldr_preparation"]
+  depends_on = [ aws_route53_record.bldr_server,
+                 null_resource.a2_preparation,
+                 null_resource.bldr_preparation ]
     triggers = {
         instance = "${aws_instance.bldr_server[count.index].id}"
     }
@@ -562,19 +565,5 @@ resource "null_resource" "bldr_preparation_2" {
       "openssl s_client -showcerts -connect ${lookup(var.common_tags, "X-Contact")}-${lookup(var.common_tags, "X-Project")}-automate.${var.domain}:443 </dev/null 2>/dev/null|openssl x509 -outform PEM | sudo tee -a $(hab pkg path core/cacerts)/ssl/cert.pem",
       "sudo systemctl restart hab-sup",
     ]
-  }
-}
-
-resource "aws_s3_bucket" "b" {
-  # bucket is public
-  # bucket is not encrypted
-  # bucket does not have access logs
-  # bucket does not have versioning
-  bucket        = "test-b"
-  acl           = "public-read"
-  force_destroy = true
-  tags = {
-    Name        = "test-b"
-    Environment = Dev
   }
 }
